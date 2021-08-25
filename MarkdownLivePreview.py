@@ -156,9 +156,14 @@ class MarkdownLivePreviewListener(sublime_plugin.EventListener):
             markdown_view.id() == self.markdown_view.id()
         ), "pre_close view.id() != close view.id()"
 
-        del self.phantom_sets[markdown_view.id()]
+        if markdown_view.id() in self.phantom_sets:
+            del self.phantom_sets[markdown_view.id()]
 
-        self.preview_window.run_command("close_window")
+        def close_window():
+            for window in sublime.windows():
+                if window.id() == self.preview_window.id():
+                    self.preview_window.run_command("close_window")
+        sublime.set_timeout_async(close_window, 100)
 
         # find the window with the right id
         original_window = next(
